@@ -7,7 +7,7 @@ const emojiDetails = [
 ];
 let currrentEmojiIndex = 0;
 let score = 0;
-let seconds = 0;
+let seconds = 10;
 let timer;
 const descriptionEl = document.getElementById("description");
 const guessInputEL = document.getElementById("guess-input");
@@ -21,45 +21,48 @@ const submitButtonEl = document.getElementById("submitButton");
 function displayEmoji() {
   descriptionEl.textContent = emojiDetails[currrentEmojiIndex].emoji;
   //
-  seconds = 3;
+  seconds = 10;
   timerEl.textContent = `Time Left : ${seconds}s`;
   skipButtonEl.style.display = "block";
   submitButtonEl.style.display = "block";
   //
   startTimer();
 }
+function proceedFurther() {
+  scoreEL.textContent = `your Score is = ${score} /${emojiDetails.length} `;
+
+  guessInputEL.value = "";
+  guessInputEL.focus();
+  nextEmoji();
+}
+// ---------------------------------------------------------------------------------------------------------------
 function checkGuess() {
   clearInterval(timer);
-  if (guessInputEL.value === "") {
-    resultEl.textContent = "";
-    //
-    resultEl.textContent = " why dont you try the previous one !! 😢";
-    scoreEL.textContent = `your Score is = ${score} /${emojiDetails.length} `;
-    guessInputEL.focus();
-    nextEmoji();
+  const expectedInput = emojiDetails[currrentEmojiIndex].description
+    .trim()
+    .toLowerCase();
+  const givenInput = guessInputEL.value.trim().toLowerCase();
+  if (expectedInput === givenInput) {
+    resultEl.textContent = " congrats ! You got it right !";
+    score++;
   } else {
-    const expectedInput = emojiDetails[currrentEmojiIndex].description
-      .trim()
-      .toLowerCase();
-    const givenInput = guessInputEL.value.trim().toLowerCase();
-    if (expectedInput === givenInput) {
-      resultEl.textContent = " congrats ! You got it right !";
-      score++;
-    } else {
-      resultEl.textContent = "Sorry, better luck next time ";
-    }
-    guessInputEL.value = " ";
-    guessInputEL.focus();
-    nextEmoji();
+    resultEl.textContent = "Sorry, better luck next time ";
   }
+  //
+  proceedFurther();
+  // } else if (givenInput === "") {
+  //   clearInterval(timer);
+
+  //   proceedFurther();
+  //   // scoreEL.textContent = `your Score is = ${score} /${emojiDetails.length} `;
+  //   resultEl.textContent = " you've skipped the previous question";
+  // }
 }
+
+// ----------------------------------------------------------------------------------------------------------
 function nextEmoji() {
   currrentEmojiIndex++;
-  if (currrentEmojiIndex % 2 != 0) {
-    document.getElementsByTagName("h1").style.backgroundColor = "skyblue";
-  } else {
-    document.getElementsByTagName("h1").style.backgroundColor = "white";
-  }
+
   if (currrentEmojiIndex === emojiDetails.length - 1) {
     submitButtonEl.textContent = "submit";
   }
@@ -72,6 +75,7 @@ function nextEmoji() {
   }
   displayEmoji();
 }
+// -----------------------------------------------------------------------------------------------------------------
 
 //  const ClickEventAfterinput =document.getElementById('guess-input');
 
@@ -87,6 +91,22 @@ document.addEventListener("DOMContentLoaded", () => {
   //
   // startTimer();
 });
+
+restartButtonEl.addEventListener("click", restartTheGame);
+skipButtonEl.addEventListener("click", () => {
+  if (guessInputEL.value != "") {
+    checkGuess();
+  } else if (guessInputEL.value === "") {
+    checkGuess();
+    resultEl.textContent = " you've skipped the previous question";
+  }
+});
+submitButtonEl.addEventListener("click", () => {
+  if (guessInputEL.value != "") {
+    checkGuess();
+  }
+});
+// ----------------------------------------------------------------------------------------------------------------------
 function startTimer() {
   //
   clearInterval(timer);
@@ -106,34 +126,28 @@ function endGame() {
   clearInterval(timer);
   descriptionEl.style.display = "none";
   guessInputEL.style.display = "none";
-  // guessInputEL.disabled = true;
+  guessInputEL.disabled = true;
   restartButtonEl.style.display = "block";
   skipButtonEl.style.display = "none";
   submitButtonEl.style.display = "none";
 
   // timerEl.style.display='none';
 }
-restartButtonEl.addEventListener("click", restartTheGame);
-skipButtonEl.addEventListener("click", checkGuess);
-submitButtonEl.addEventListener("click", () => {
-  if (guessInputEL.value != "") {
-    checkGuess();
-  }
-});
 
 function restartTheGame() {
   //
   clearInterval(timer);
   guessInputEL.style.display = "inline-block";
   descriptionEl.style.display = "block";
-  // guessInputEL.disabled = false;
+  guessInputEL.disabled = false;
   currrentEmojiIndex = 0;
   score = 0;
+  seconds = 10;
 
   scoreEL.textContent = `your Score is ${score}`;
   resultEl.textContent = "";
   guessInputEL.value = "";
-  submitButtonEl.textContent = "Next Question";
+  submitButtonEl.textContent = "proceed";
   restartButtonEl.style.display = "none";
   timerEl.style.display = "inline-block";
   displayEmoji();
